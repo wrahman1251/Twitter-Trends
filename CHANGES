@@ -1,0 +1,154 @@
+VERSION 1.1
+CHANGE:: cache::
+    """
+    # Storing original implementations of ADTs
+    trends.tweet_adt = (make_tweet, tweet_text, tweet_time, tweet_location)
+    trends.tweet_fn_adt = (make_tweet_fn, tweet_text_fn, tweet_time_fn, tweet_location_fn)
+    trends.sentiment_adt = (make_sentiment, has_sentiment, sentiment_value)
+    trends.position_adt = (make_position, latitude, longitude)
+    round5 = lambda args: tuple(round(arg, 5) for arg in args)
+    trends.database_adt = (make_database, add_value, get_keys, get_values, get_value_from_key, get_len, get_items)
+    geo.database_adt = (make_database, add_value, get_items)
+    geo.us_states_adt = us_states
+
+    # These classes test abstraction violations
+    class AbstractionViolation(Exception):
+        pass
+
+    def datatype(obj):
+        return type(obj).__name__
+
+    # Generic abstract data type
+    class Abstract(object):
+        def __add__(self, other):
+            raise AbstractionViolation("Can't add {} object to {}".format(datatype(self), datatype(other)))
+
+        def __radd__(self, other):
+            raise AbstractionViolation("Can't add {} object to {}".format(datatype(self), datatype(other)))
+
+        def __eq__(self, other):
+            if isinstance(other, type(self)):
+                return other is self
+            raise AbstractionViolation("Can't use == on {} object and {}".format(datatype(self), datatype(other)))
+
+        def __ne__(self, other):
+            if isinstance(other, type(self)):
+                return other is not self
+            raise AbstractionViolation("Can't use != on {} object and {}".format(datatype(self), datatype(other)))
+
+        def __bool__(self):
+            raise AbstractionViolation("Can't use {} object as a boolean".format(datatype(self)))
+
+        def __getitem__(self, index):
+            raise AbstractionViolation("Can't use [] notation on {} object".format(datatype(self)))
+
+        def __contains__(self, other):
+            raise AbstractionViolation("Can't use contains notation on {} object".format(datatype(self)))
+
+        def __delitem__(self, other):
+            raise AbstractionViolation("Can't use del notation on {} object".format(datatype(self)))
+
+        def __iter__(self):
+            raise AbstractionViolation("Can't iterate on {} object".format(datatype(self)))
+
+        def __len__(self):
+            raise AbstractionViolation("Can't use len notation on {} object".format(datatype(self)))
+
+        def __setitem__(self, key, item):
+            raise AbstractionViolation("Can't use setitem notation on {} object".format(datatype(self)))
+
+
+    class Database(Abstract):
+        def __init__(self):
+            self._dictionary = {}
+
+        @staticmethod
+        def make_database():
+            return Database()
+
+        def add_value(self, key, value):
+            if type(key) != int and type(key) != str:
+                raise TypeError("databases only accept strings or numbers as keys")
+            self._dictionary[key] = value
+            return self
+
+        def get_keys(self):
+            return list(self._dictionary.keys())
+
+        def get_values(self):
+            return list(self._dictionary.values())
+
+        def get_value_from_key(self, key):
+            return self._dictionary[key]
+
+        def get_len(self):
+            return len(self._dictionary)
+
+        def get_items(self):
+            items = []
+            for key, value in self._dictionary.items():
+                items += [[key, value]]
+            return items
+
+        def get(self, key, default=None):
+            raise AbstractionViolation("Can't use get notation on {} object".format(datatype(self)))
+
+        def setdefault(self, key, default=None):
+            raise AbstractionViolation("Can't use setdefault notation on {} object".format(datatype(self)))
+
+        def items(self):
+            raise AbstractionViolation("Can't use items notation on {} object".format(datatype(self)))
+
+        def keys(self):
+            raise AbstractionViolation("Can't use keys notation on {} object".format(datatype(self)))
+
+        def values(self):
+            raise AbstractionViolation("Can't use values notation on {} object".format(datatype(self)))
+
+    class Tweet(Abstract):
+        def __init__(self, text, time, lat, lon):
+            self._text = text
+            self._time = time
+            self._lat = lat
+            self._lon = lon
+
+        def text(self):
+            return self._text
+
+        def time(self):
+            return self._time
+
+        def location(self):
+            return trends.make_position(self._lat, self._lon)
+
+    class Sentiment(Abstract):
+        def __init__(self, value):
+            assert value is None or type(value) in (float, int), 'invalid value to sentiment constructor: {}'.format(datatype(value))
+            self._value = value
+
+        def sentiment_value(self):
+            if type(self) != Sentiment:
+                raise AbstractionViolation("Can't call sentiment_value on {}".format(self))
+            assert self.has_sentiment(), 'No sentiment value'
+            return self._value
+
+        def has_sentiment(self):
+            if type(self) != Sentiment:
+                raise AbstractionViolation("Can't call has_sentiment on {}".format(self))
+            return self._value != None
+
+    class Position(Abstract):
+        def __init__(self, lat, lon):
+            self._lat = lat
+            self._lon = lon
+
+        def latitude(self):
+            if type(self) != Position:
+                raise AbstractionViolation("Can't call latitude on {}".format(self))
+            return self._lat
+
+        def longitude(self):
+            if type(self) != Position:
+                raise AbstractionViolation("Can't call longitude on {}".format(self))
+            return self._lon
+    """
